@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Export Defender: Smash the Barriers!</title>
+  <style>
+    /* ==========================================
+       ATUR BACKGROUND SELURUH HALAMAN
+    ========================================== */
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0; padding: 0; overflow: hidden;
+      /* Ganti 'background.png' dengan nama file latar pelabuhan Anda */
+      background: url('background.png') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      /* Supaya layar gameplay tampil di atas background */
+      background: rgba(255,255,255,0.8);
+    }
+    .screen:not(.hidden) { display: flex; }
+    .hidden { display: none !important; }
+
+    button {
+      padding: 10px 20px; margin: 10px;
+      font-size: 16px; font-weight: bold;
+      background-color: black; color: white;
+      border: none; border-radius: 12px;
+      cursor: pointer;
+    }
+    button:hover { background-color: #333; }
+    .logo { width: 200px; margin-bottom: 20px; }
+
+    /* GRID KONTAINERNYA */
+    #board {
+      width: 540px; height: 540px;
+      display: flex; flex-wrap: wrap;
+      margin: 20px auto;
+      border: 3px solid white; border-radius: 25px;
+      position: relative;
+      /* Transparan agar background terlihat */
+      background: transparent;
+    }
+    #board > div {
+      width: 180px; height: 180px;
+      background: url('kontainer.png') no-repeat center center;
+      background-size: contain;
+      position: relative;
+    }
+
+    .mole {
+      position: absolute;
+      top: 40px; left: 40px;
+      width: 100px; height: 100px;
+      cursor: pointer;
+    }
+    #hammer {
+      position: absolute; width: 80px; height: 80px;
+      pointer-events: none; transform: rotate(-45deg);
+      display: none; z-index: 10;
+    }
+    #smash-effect {
+      position: absolute; width: 100px; height: 100px;
+      background: url('smash.png') no-repeat center center;
+      background-size: contain; pointer-events: none;
+      display: none; z-index: 15;
+      animation: smashPop 0.25s ease-out;
+    }
+    @keyframes smashPop {
+      0% { transform: scale(0.5); opacity: 0.7; }
+      50% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(0.8); opacity: 0; }
+    }
+
+    #scoreboard {
+      font-size: 20px; font-weight: bold;
+      display: flex; justify-content: space-around;
+      width: 400px; margin: auto; color: #333;
+    }
+    #infoBox {
+      margin-top: 10px;
+      font-size: 14px; color: #222;
+      min-height: 1.2em;
+    }
+
+    /* SHOP & SETTING */
+    .shop { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .8rem; padding: 1rem; max-width: 90vw; }
+    .shop-item {
+      background: #fff; border-radius: 16px; box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      padding: .8rem; text-align: center; font-size: 14px; cursor: pointer;
+      transition: transform .2s ease-in-out;
+    }
+    .shop-item:hover { transform: scale(1.05); }
+    .shop-item img { width: 50px; margin-bottom: .5rem; }
+    .shop-price { color: #36a63a; font-weight: bold; margin-top: 5px; }
+    .coin-display {
+      position: absolute; top: 10px; right: 20px;
+      font-weight: bold; background: white;
+      padding: 5px 15px; border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    @keyframes riseUp { from { transform: translateY(100%); opacity:0 } to { transform: translateY(0); opacity:1 } }
+    @keyframes fallDown { from { transform: translateY(0); opacity:1 } to { transform: translateY(100%); opacity:0 } }
+    .rise-up { animation: riseUp .3s ease-out; }
+    .fall-down { animation: fallDown .3s ease-in; }
+  </style>
+</head>
+<body>
+
+<img id="hammer" src="hamburger.png" alt="hammer">
+<div id="smash-effect"></div>
+
+<!-- MAIN MENU -->
+<div id="main-menu" class="screen">
+  <img src="logo.png" class="logo" alt="Logo"/>
+  <h1>Export Defender: Smash the Barriers!</h1>
+  <button onclick="startGame()">MULAI</button>
+  <button onclick="toggleSetting()">SETTING</button>
+  <button onclick="openShop()">SHOP</button>
+</div>
+
+<!-- SETTING -->
+<div id="settings" class="screen hidden">
+  <h2>SETTING</h2>
+  <button onclick="toggleSound()">SOUND: <span id="soundStatus">ON</span></button>
+  <button onclick="toggleBGM()">BGM: <span id="bgmStatus">ON</span></button>
+  <button onclick="toggleSetting()">KEMBALI</button>
+</div>
+
+<!-- SHOP -->
+<div id="shop" class="screen hidden">
+  <div class="coin-display">💰 Koin: <span id="coinCount">100</span></div>
+  <h2>SHOP</h2>
+  <div class="shop">
+    <div class="shop-item" onclick="buyItem(15)">
+      <img src="coffe.png"><h3>Kopi Gayo</h3><div class="shop-price">Rp 15</div>
+    </div>
+    <div class="shop-item" onclick="buyItem(30)">
+      <img src="batik.png"><h3>Batik</h3><div class="shop-price">Rp 30</div>
+    </div>
+    <div class="shop-item" onclick="buyItem(20)">
+      <img src="spices.png"><h3>Rempah-rempah</h3><div class="shop-price">Rp 20</div>
+    </div>
+    <div class="shop-item" onclick="buyItem(10)">
+      <img src="halal.png"><h3>Sertifikasi Halal</h3><div class="shop-price">Rp 10</div>
+    </div>
+    <div class="shop-item" onclick="buyItem(25)">
+      <img src="haccp.png"><h3>Sertifikasi HACCP</h3><div class="shop-price">Rp 25</div>
+    </div>
+  </div>
+  <button onclick="closeShop()">KEMBALI</button>
+</div>
+
+<!-- GAMEPLAY -->
+<div id="gameplay" class="screen hidden">
+  <div id="scoreboard">
+    <div>PRODUK TERKIRIM: <span id="score">0</span></div>
+    <div>WAKTU: <span id="time">60</span> detik</div>
+  </div>
+  <div id="infoBox"></div>
+  <div id="board"></div>
+</div>
+
+<!-- GAME OVER -->
+<div id="game-over" class="screen hidden">
+  <h2>Produk Tertahan di Pelabuhan! 😥</h2>
+  <p>Skor kamu: <span id="final-score">0</span></p>
+  <button onclick="retryGame()">COBA LAGI</button>
+  <button onclick="returnToMenu()">KEMBALI</button>
+</div>
+
+<!-- WIN SCREEN -->
+<div id="win-screen" class="screen hidden">
+  <h2>Selamat! Ekspor Berhasil! 🚀</h2>
+  <p>Skor akhir: <span id="win-score">0</span></p>
+  <button onclick="returnToMenu()">KEMBALI</button>
+</div>
+
+<!-- AUDIO -->
+<audio id="bgm" src="music.mp3" loop></audio>
+<audio id="hitSound" src="hit.mp3"></audio>
+
+<script>
+  const board          = document.getElementById('board');
+  const scoreText      = document.getElementById('score');
+  const timeText       = document.getElementById('time');
+  const infoBox        = document.getElementById('infoBox');
+  const hammer         = document.getElementById('hammer');
+  const smash          = document.getElementById('smash-effect');
+  const coinDisplay    = document.getElementById('coinCount');
+  const bgm            = document.getElementById('bgm');
+  const hitSound       = document.getElementById('hitSound');
+  const mainMenu       = document.getElementById('main-menu');
+  const settingsScreen = document.getElementById('settings');
+  const shopScreen     = document.getElementById('shop');
+  const gameplay       = document.getElementById('gameplay');
+  const gameOverScreen = document.getElementById('game-over');
+  const winScreen      = document.getElementById('win-screen');
+  const finalScoreText = document.getElementById('final-score');
+  const winScoreText   = document.getElementById('win-score');
+  const soundStatus    = document.getElementById('soundStatus');
+  const bgmStatus      = document.getElementById('bgmStatus');
+
+  let score = 0, time = 60, coins = 100, timer, spawnTimeout, spawnInterval = 1500;
+  let soundOn = true, bgmOn = true;
+
+  // Delapan barrier + deskripsi edukasi
+  const barriers = [
+    { src:'barrier1.png', desc:'Gula Aren: Ekspor gula aren tambah nilai pertanian lokal.' },
+    { src:'barrier2.png', desc:'Kopi Gayo: Kopi spesial Aceh, diminati pasar internasional.' },
+    { src:'barrier3.png', desc:'Rempah-rempah: Komoditas sejarah perdagangan Indonesia.' },
+    { src:'barrier4.png', desc:'Kursi Jepara: Furnitur ukir kayu, ekspor kreatif Indonesia.' },
+    { src:'barrier5.png', desc:'Ekspor Ilegal: Pengiriman tanpa izin resmi, sanksi hukum.' },
+    { src:'barrier6.png', desc:'Logo Non-Halal: Perlu sertifikat halal agar pasar luas.' },
+    { src:'barrier7.png', desc:'Importer Bodong: Risiko kerjasama dengan pembeli ilegal.' },
+    { src:'barrier8.png', desc:'Anti-Dumping: Kebijakan proteksi harga impor murah.' }
+  ];
+  const goodBarriers = barriers.slice(0,4).map(b=>b.src);
+
+  function startGame(){
+    score=0; time=60; spawnInterval=1500;
+    updateScore(); updateTime();
+    [mainMenu,settingsScreen,shopScreen,gameOverScreen,winScreen]
+      .forEach(el=>el.classList.add('hidden'));
+    gameplay.classList.remove('hidden');
+    infoBox.textContent='';
+    if(bgmOn) bgm.play();
+    startTimer();
+    spawnBarriers();
+  }
+  function updateScore(){ scoreText.textContent = score; }
+  function updateTime() { timeText.textContent = time; }
+
+  function startTimer(){
+    timer = setInterval(()=>{
+      time--; updateTime();
+      if(time%5===0 && spawnInterval>500) spawnInterval-=200;
+      if(time<=0) endGame();
+    },1000);
+  }
+
+  function endGame(){
+    clearInterval(timer); clearTimeout(spawnTimeout);
+    gameplay.classList.add('hidden');
+    gameOverScreen.classList.remove('hidden');
+    finalScoreText.textContent = score;
+    bgm.pause();
+  }
+
+  function showWinScreen(){
+    clearInterval(timer); clearTimeout(spawnTimeout);
+    gameplay.classList.add('hidden');
+    winScreen.classList.remove('hidden');
+    winScoreText.textContent = score;
+    coins += 20; coinDisplay.textContent = coins;
+    bgm.pause();
+  }
+
+  function spawnBarriers(){
+    board.innerHTML='';
+    for(let i=0;i<9;i++) board.appendChild(document.createElement('div'));
+    const tile = board.children[Math.floor(Math.random()*9)];
+    const data = barriers[Math.floor(Math.random()*barriers.length)];
+    const img  = document.createElement('img');
+    img.src=data.src; img.className='mole rise-up';
+    img.onclick=e=>{
+      if(soundOn) hitSound.play();
+      if(goodBarriers.includes(data.src)){
+        score+=10; coins+=5;
+      } else {
+        score=Math.max(0,score-10);
+      }
+      updateScore(); coinDisplay.textContent=coins;
+      infoBox.textContent=data.desc;
+      img.classList.replace('rise-up','fall-down');
+      setTimeout(()=>img.remove(),300);
+      showHammer(e.pageX,e.pageY);
+      if(score>=100) showWinScreen();
+    };
+    tile.appendChild(img);
+    spawnTimeout = setTimeout(spawnBarriers, spawnInterval);
+  }
+
+  function showHammer(x,y){
+    hammer.style.left=`${x-40}px`; hammer.style.top=`${y-40}px`; hammer.style.display='block';
+    smash.style.left=`${x-50}px`; smash.style.top=`${y-50}px`; smash.style.display='block';
+    smash.style.animation='none'; smash.offsetHeight; smash.style.animation='smashPop 0.25s ease-out';
+    setTimeout(()=>{
+      hammer.style.display='none'; smash.style.display='none';
+    },250);
+  }
+
+  document.addEventListener('mousemove',e=>{
+    hammer.style.left=`${e.pageX-40}px`;
+    hammer.style.top=`${e.pageY-40}px`;
+  });
+
+  // Fungsi tambahan
+  function toggleSetting(){ mainMenu.classList.toggle('hidden'); settingsScreen.classList.toggle('hidden'); }
+  function openShop(){ mainMenu.classList.add('hidden'); shopScreen.classList.remove('hidden'); coinDisplay.textContent=coins; }
+  function closeShop(){ shopScreen.classList.add('hidden'); mainMenu.classList.remove('hidden'); }
+  function toggleSound(){ soundOn=!soundOn; soundStatus.textContent=soundOn?'ON':'OFF'; }
+  function toggleBGM(){ bgmOn=!bgmOn; bgmStatus.textContent=bgmOn?'ON':'OFF'; if(!bgmOn) bgm.pause(); else bgm.play(); }
+  function buyItem(p){ if(coins>=p){ coins-=p; coinDisplay.textContent=coins; alert('Item berhasil dibeli!'); } else alert('Koin tidak cukup!'); }
+  function returnToMenu(){ gameOverScreen.classList.add('hidden'); winScreen.classList.add('hidden'); mainMenu.classList.remove('hidden'); }
+  function retryGame(){ gameOverScreen.classList.add('hidden'); startGame(); }
+</script>
+
+</body>
+</html>
