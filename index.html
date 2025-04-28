@@ -123,7 +123,7 @@
 <div id="main-menu" class="screen">
   <img src="logo.png" class="logo" alt="Logo"/>
   <h1>Export Defender: Smash the Barriers!</h1>
-  <button onclick="startGame()">MULAI</button>
+  <button onclick="startGame()">START</button>
   <button onclick="toggleSetting()">SETTING</button>
   <button onclick="openShop()">SHOP</button>
 </div>
@@ -133,7 +133,7 @@
   <h2>SETTING</h2>
   <button onclick="toggleSound()">SOUND: <span id="soundStatus">ON</span></button>
   <button onclick="toggleBGM()">BGM: <span id="bgmStatus">ON</span></button>
-  <button onclick="toggleSetting()">KEMBALI</button>
+  <button onclick="toggleSetting()">BACK</button>
 </div>
 
 <!-- SHOP -->
@@ -157,7 +157,7 @@
       <img src="haccp.png"><h3>Sertifikasi HACCP</h3><div class="shop-price">Rp 25</div>
     </div>
   </div>
-  <button onclick="closeShop()">KEMBALI</button>
+  <button onclick="closeShop()">BACK</button>
 </div>
 
 <!-- GAMEPLAY -->
@@ -175,14 +175,14 @@
   <h2>Produk Tertahan di Pelabuhan! 😥</h2>
   <p>Skor kamu: <span id="final-score">0</span></p>
   <button onclick="retryGame()">COBA LAGI</button>
-  <button onclick="returnToMenu()">KEMBALI</button>
+  <button onclick="returnToMenu()">BACK</button>
 </div>
 
 <!-- WIN SCREEN -->
 <div id="win-screen" class="screen hidden">
   <h2>Selamat! Ekspor Berhasil! 🚀</h2>
   <p>Skor akhir: <span id="win-score">0</span></p>
-  <button onclick="returnToMenu()">KEMBALI</button>
+  <button onclick="returnToMenu()">BACK</button>
 </div>
 
 <!-- AUDIO -->
