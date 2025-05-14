@@ -5,16 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Export Defender: Smash the Barriers!</title>
   <style>
-    /* ==========================================
-       ATUR BACKGROUND SELURUH HALAMAN
-    ========================================== */
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
       margin: 0; padding: 0; overflow: hidden;
-      /* Ganti 'background.png' dengan nama file latar pelabuhan Anda */
       background: url('background.png') no-repeat center center fixed;
       background-size: cover;
+      text-align: center;
     }
 
     .screen {
@@ -23,9 +19,9 @@
       align-items: center;
       justify-content: center;
       height: 100vh;
-      /* Supaya layar gameplay tampil di atas background */
-      background: rgba(255,255,255,0.8);
+      background: rgba(255,255,255,0.85);
     }
+
     .screen:not(.hidden) { display: flex; }
     .hidden { display: none !important; }
 
@@ -37,18 +33,28 @@
       cursor: pointer;
     }
     button:hover { background-color: #333; }
-    .logo { width: 200px; margin-bottom: 20px; }
 
-    /* GRID KONTAINERNYA */
+    .logo { width: 200px; margin-bottom: 10px; }
+
+    #game-description {
+      max-width: 600px;
+      background: rgba(255,255,255,0.9);
+      padding: 15px;
+      margin: 10px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
     #board {
       width: 540px; height: 540px;
       display: flex; flex-wrap: wrap;
       margin: 20px auto;
       border: 3px solid white; border-radius: 25px;
-      position: relative;
-      /* Transparan agar background terlihat */
       background: transparent;
+      position: relative;
     }
+
     #board > div {
       width: 180px; height: 180px;
       background: url('kontainer.png') no-repeat center center;
@@ -62,11 +68,13 @@
       width: 100px; height: 100px;
       cursor: pointer;
     }
+
     #hammer {
       position: absolute; width: 80px; height: 80px;
       pointer-events: none; transform: rotate(-45deg);
       display: none; z-index: 10;
     }
+
     #smash-effect {
       position: absolute; width: 100px; height: 100px;
       background: url('smash.png') no-repeat center center;
@@ -74,6 +82,7 @@
       display: none; z-index: 15;
       animation: smashPop 0.25s ease-out;
     }
+
     @keyframes smashPop {
       0% { transform: scale(0.5); opacity: 0.7; }
       50% { transform: scale(1.1); opacity: 1; }
@@ -85,13 +94,13 @@
       display: flex; justify-content: space-around;
       width: 400px; margin: auto; color: #333;
     }
+
     #infoBox {
       margin-top: 10px;
       font-size: 14px; color: #222;
       min-height: 1.2em;
     }
 
-    /* SHOP & SETTING */
     .shop { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .8rem; padding: 1rem; max-width: 90vw; }
     .shop-item {
       background: #fff; border-radius: 16px; box-shadow: 0 8px 16px rgba(0,0,0,0.1);
@@ -123,6 +132,12 @@
 <div id="main-menu" class="screen">
   <img src="logo.png" class="logo" alt="Logo"/>
   <h1>Export Defender: Smash the Barriers!</h1>
+  <div id="game-description">
+    <strong>Cara Main:</strong> Pukul hambatan ekspor yang muncul dari kontainer!<br>
+    Hambatan baik (misalnya Gula Aren, Kopi Gayo) = tambah skor ✅<br>
+    Hambatan buruk (misalnya ekspor ilegal, logo non-halal) = kurangi skor ❌<br>
+    Capai 100 poin untuk menang! 🎯
+  </div>
   <button onclick="startGame()">START</button>
   <button onclick="toggleSetting()">SETTING</button>
   <button onclick="openShop()">SHOP</button>
@@ -190,30 +205,29 @@
 <audio id="hitSound" src="hit.mp3"></audio>
 
 <script>
-  const board          = document.getElementById('board');
-  const scoreText      = document.getElementById('score');
-  const timeText       = document.getElementById('time');
-  const infoBox        = document.getElementById('infoBox');
-  const hammer         = document.getElementById('hammer');
-  const smash          = document.getElementById('smash-effect');
-  const coinDisplay    = document.getElementById('coinCount');
-  const bgm            = document.getElementById('bgm');
-  const hitSound       = document.getElementById('hitSound');
-  const mainMenu       = document.getElementById('main-menu');
+  const board = document.getElementById('board');
+  const scoreText = document.getElementById('score');
+  const timeText = document.getElementById('time');
+  const infoBox = document.getElementById('infoBox');
+  const hammer = document.getElementById('hammer');
+  const smash = document.getElementById('smash-effect');
+  const coinDisplay = document.getElementById('coinCount');
+  const bgm = document.getElementById('bgm');
+  const hitSound = document.getElementById('hitSound');
+  const mainMenu = document.getElementById('main-menu');
   const settingsScreen = document.getElementById('settings');
-  const shopScreen     = document.getElementById('shop');
-  const gameplay       = document.getElementById('gameplay');
+  const shopScreen = document.getElementById('shop');
+  const gameplay = document.getElementById('gameplay');
   const gameOverScreen = document.getElementById('game-over');
-  const winScreen      = document.getElementById('win-screen');
+  const winScreen = document.getElementById('win-screen');
   const finalScoreText = document.getElementById('final-score');
-  const winScoreText   = document.getElementById('win-score');
-  const soundStatus    = document.getElementById('soundStatus');
-  const bgmStatus      = document.getElementById('bgmStatus');
+  const winScoreText = document.getElementById('win-score');
+  const soundStatus = document.getElementById('soundStatus');
+  const bgmStatus = document.getElementById('bgmStatus');
 
   let score = 0, time = 60, coins = 100, timer, spawnTimeout, spawnInterval = 1500;
   let soundOn = true, bgmOn = true;
 
-  // Delapan barrier + deskripsi edukasi
   const barriers = [
     { src:'barrier1.png', desc:'Gula Aren: Ekspor gula aren tambah nilai pertanian lokal.' },
     { src:'barrier2.png', desc:'Kopi Gayo: Kopi spesial Aceh, diminati pasar internasional.' },
@@ -229,14 +243,14 @@
   function startGame(){
     score=0; time=60; spawnInterval=1500;
     updateScore(); updateTime();
-    [mainMenu,settingsScreen,shopScreen,gameOverScreen,winScreen]
-      .forEach(el=>el.classList.add('hidden'));
+    [mainMenu,settingsScreen,shopScreen,gameOverScreen,winScreen].forEach(el=>el.classList.add('hidden'));
     gameplay.classList.remove('hidden');
     infoBox.textContent='';
     if(bgmOn) bgm.play();
     startTimer();
     spawnBarriers();
   }
+
   function updateScore(){ scoreText.textContent = score; }
   function updateTime() { timeText.textContent = time; }
 
@@ -304,7 +318,6 @@
     hammer.style.top=`${e.pageY-40}px`;
   });
 
-  // Fungsi tambahan
   function toggleSetting(){ mainMenu.classList.toggle('hidden'); settingsScreen.classList.toggle('hidden'); }
   function openShop(){ mainMenu.classList.add('hidden'); shopScreen.classList.remove('hidden'); coinDisplay.textContent=coins; }
   function closeShop(){ shopScreen.classList.add('hidden'); mainMenu.classList.remove('hidden'); }
